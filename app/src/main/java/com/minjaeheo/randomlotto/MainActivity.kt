@@ -53,11 +53,21 @@ class MainActivity : AppCompatActivity() {
 
         initRunButton()
         initAddButton()
+        initClearButton()
     }
 
     private fun initRunButton() {
         runButton.setOnClickListener {
             val list = getRandomNumber()
+
+            didRun = true
+
+            list.forEachIndexed { index, number ->
+                val textView = numberTextViewList[index]
+
+                textView.text = number.toString()
+                textView.isVisible = true
+            }
 
             Log.d("태그태그", list.toString())
         }
@@ -88,11 +98,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun initClearButton() {
+        clearButton.setOnClickListener {
+            pickNumberSet.clear()
+            // 리스트의 index를 앞에서부터 하나하나 꺼내온다
+            numberTextViewList.forEach {
+                it.isVisible = false
+            }
+
+            didRun = false
+        }
+    }
+
     private fun getRandomNumber(): List<Int> {
         //apply를 통해 바로 초기화
         val numberList = mutableListOf<Int>()
             .apply {
                 for (i in 1..45) {
+                    // 1~45에서 이미 선택된 번호가 나왔다면 add하지않고 다시 돌아간다.
+                    if (pickNumberSet.contains(i)) {
+                        continue
+                    }
+
                     this.add(i)
                 }
             }
@@ -101,7 +128,8 @@ class MainActivity : AppCompatActivity() {
         numberList.shuffle()
 
         // numberList안의 0번째부터 5번째까지의 index를 가지고 리스트 작성
-        val newList = numberList.subList(0,6)
+        // 이미 선택된 숫자의 셋을 리스트로 변환해주고 6에서 선택된 숫자를 뺀 리스트를 가져옴
+        val newList = pickNumberSet.toList() + numberList.subList(0,6 - pickNumberSet.size)
 
         // sorted()를 통해 오름차순 정렬
         return newList.sorted()
